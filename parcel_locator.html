@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ParcelLocate — Track Your Parcel</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,Helvetica,sans-serif;background:#f4f7fb;color:#172033}
+header{background:#155eef;color:white;padding:22px 7%;display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:24px;font-weight:800}
+.badge{background:#ffffff22;padding:8px 13px;border-radius:20px;font-size:13px}
+.hero{padding:55px 7% 35px;text-align:center;background:linear-gradient(135deg,#155eef,#4f8cff);color:white}
+.hero h1{font-size:clamp(30px,5vw,52px);margin-bottom:12px}
+.hero p{opacity:.9;margin-bottom:25px}
+.search{max-width:720px;margin:auto;display:flex;background:white;padding:7px;border-radius:14px;box-shadow:0 12px 30px #001f5b33}
+.search input{flex:1;border:0;outline:0;padding:16px;font-size:16px;border-radius:10px}
+.search button{border:0;background:#155eef;color:white;padding:0 25px;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer}
+.container{max-width:1100px;margin:35px auto;padding:0 20px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.card{background:white;border-radius:18px;padding:25px;box-shadow:0 5px 18px #13264d12}
+.card h2{font-size:20px;margin-bottom:18px}
+.map{height:310px;border-radius:14px;position:relative;overflow:hidden;background-color:#dfead9;background-image:linear-gradient(25deg,transparent 46%,#fff 47%,#fff 50%,transparent 51%),linear-gradient(115deg,transparent 45%,#fff 46%,#fff 49%,transparent 50%),linear-gradient(90deg,#c8ddc2 1px,transparent 1px),linear-gradient(#c8ddc2 1px,transparent 1px);background-size:auto,auto,45px 45px,45px 45px}
+.road{position:absolute;height:10px;background:#fff;transform:rotate(-25deg);width:130%;left:-10%;top:48%;box-shadow:0 0 0 2px #cbd5c7}
+.pin{position:absolute;left:58%;top:38%;width:34px;height:34px;background:#ef4444;border:5px solid white;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 4px 10px #0004}
+.pin:after{content:"";position:absolute;width:9px;height:9px;background:white;border-radius:50%;left:8px;top:8px}
+.maplabel{position:absolute;bottom:14px;left:14px;background:white;padding:9px 12px;border-radius:9px;font-size:13px;font-weight:bold}
+.info{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.info div{background:#f6f8fc;padding:14px;border-radius:10px}
+.label{font-size:12px;color:#687386;margin-bottom:5px}
+.value{font-weight:700}
+.status{display:flex;gap:14px;margin:18px 0;position:relative}
+.status:before{content:"";position:absolute;left:10px;top:22px;width:2px;height:calc(100% - 4px);background:#dce3ee}
+.dot{width:22px;height:22px;background:#155eef;border:4px solid #dce8ff;border-radius:50%;z-index:1;flex:none}
+.status:last-child .dot{background:#dce3ee}
+.status h3{font-size:15px}
+.status p{font-size:13px;color:#697386;margin-top:4px}
+.hidden{display:none}
+.notice{margin-top:20px;padding:14px;border-radius:10px;background:#fff8e6;color:#795900;font-size:13px}
+@media(max-width:750px){.grid{grid-template-columns:1fr}.search{flex-direction:column;background:transparent;box-shadow:none}.search input,.search button{height:52px}.search button{margin-top:8px}.info{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">📦 ParcelLocate</div>
+  <div class="badge">Fast &amp; Simple Tracking</div>
+</header>
+
+<section class="hero">
+  <h1>Locate Your Parcel</h1>
+  <p>Enter your tracking number to see your parcel's latest location and delivery progress.</p>
+  <div class="search">
+    <input id="trackingInput" placeholder="Enter tracking number (try: PH123456789)" autocomplete="off">
+    <button onclick="trackParcel()">Track Parcel</button>
+  </div>
+</section>
+
+<main class="container">
+  <div id="result" class="grid hidden">
+    <section class="card">
+      <h2>📍 Current Location</h2>
+      <div class="map">
+        <div class="road"></div>
+        <div class="pin"></div>
+        <div class="maplabel" id="locationLabel">Iloilo City, Philippines</div>
+      </div>
+      <div class="notice">Demo location shown. Connect a courier tracking API to display real-time parcel coordinates.</div>
+    </section>
+
+    <section class="card">
+      <h2>Parcel Details</h2>
+      <div class="info">
+        <div><div class="label">Tracking Number</div><div class="value" id="trackingNo">—</div></div>
+        <div><div class="label">Status</div><div class="value" id="currentStatus">—</div></div>
+        <div><div class="label">Courier</div><div class="value">ParcelLocate Demo</div></div>
+        <div><div class="label">Estimated Delivery</div><div class="value">Tomorrow</div></div>
+      </div>
+      <h2 style="margin-top:25px">Delivery Progress</h2>
+      <div class="status"><div class="dot"></div><div><h3>Parcel in transit</h3><p>Arrived at local sorting facility</p></div></div>
+      <div class="status"><div class="dot"></div><div><h3>Departed previous facility</h3><p>Parcel is moving toward destination</p></div></div>
+      <div class="status"><div class="dot"></div><div><h3>Order received</h3><p>Tracking information created</p></div></div>
+    </section>
+  </div>
+
+  <section id="welcome" class="card" style="text-align:center">
+    <h2>Ready to track?</h2>
+    <p style="color:#687386">Enter your parcel's tracking number above to view its delivery information.</p>
+  </section>
+</main>
+
+<script>
+function trackParcel(){
+  const input=document.getElementById("trackingInput");
+  const value=input.value.trim();
+  if(!value){
+    input.focus();
+    input.placeholder="Please enter a tracking number";
+    return;
+  }
+  document.getElementById("trackingNo").textContent=value.toUpperCase();
+  document.getElementById("currentStatus").textContent="In Transit";
+  document.getElementById("result").classList.remove("hidden");
+  document.getElementById("welcome").classList.add("hidden");
+  document.getElementById("locationLabel").textContent="Iloilo City, Philippines";
+}
+document.getElementById("trackingInput").addEventListener("keydown",e=>{
+  if(e.key==="Enter") trackParcel();
+});
+</script>
+</body>
+</html>
